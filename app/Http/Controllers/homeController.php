@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Category;
+use App\Models\Post;
 
 class homeController extends Controller
 {
     public function index()
     {
+        
         return view('home.home');
     }
 
@@ -21,10 +24,32 @@ class homeController extends Controller
         return view('home.contact');
     }
 
-     public function categories()
+    public function categories(Request $request)
     {
-        return view('home.categories');
+        // Default sort = newest
+        $sort = $request->get('sort', 'newest');
+
+        $query = Post::with('category');
+
+        // Apply sorting
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'popular':
+                $query->orderBy('views', 'desc'); // make sure you have "views" column
+                break;
+            
+            default: // newest
+                $query->orderBy('created_at', 'desc');
+        }
+
+        $posts = $query->paginate(5)->appends(['sort' => $sort]); // keep sort in pagination links
+        $categories = Category::all();
+
+        return view('home.categories', compact('posts', 'categories', 'sort'));
     }
+
 
       public function login()
     {

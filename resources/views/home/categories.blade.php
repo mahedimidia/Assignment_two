@@ -27,7 +27,7 @@
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="#" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                    <a href="{{ route('home.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                         <i class="fas fa-home mr-2"></i>
                         Home
                     </a>
@@ -35,13 +35,16 @@
                 <li>
                     <div class="flex items-center">
                         <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                        <a href="#" class="ml-1 md:ml-2 text-sm font-medium text-gray-700 hover:text-blue-600">Categories</a>
+                        <a href="{{ route('home.categories') }}" class="ml-1 md:ml-2 text-sm font-medium text-gray-700 hover:text-blue-600">Categories</a>
                     </div>
                 </li>
                 <li aria-current="page">
                     <div class="flex items-center">
                         <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                        <span class="ml-1 md:ml-2 text-sm font-medium text-blue-600">Web Development</span>
+                        <span class="ml-1 md:ml-2 text-sm font-medium text-blue-600">
+                            
+                        {{ $categories->first()->title ?? 'N/A' }}
+                    </span>
                     </div>
                 </li>
             </ol>
@@ -56,46 +59,67 @@
             <div class="bg-white rounded-lg shadow p-4 mb-6">
                 <div class="flex flex-wrap gap-2">
                     <button class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">All</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">JavaScript</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">React</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">Vue</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">Angular</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">CSS</button>
-                    <button class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">HTML</button>
+
+                    @foreach ($categories as $category )
+                    <a href="#" class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">{{$category->title}}</a>
+                    @endforeach
+                    
+                    
                 </div>
             </div>
 
             <!-- Sort Options -->
             <div class="flex justify-between items-center mb-6">
-                <p class="text-gray-600">Showing 12 of 48 articles</p>
+                <div class="text-sm text-gray-700">
+                    Showing 
+                    <span class="font-medium">{{ $posts->firstItem() }}</span>
+                    to 
+                    <span class="font-medium">{{ $posts->lastItem() }}</span>
+                    of 
+                    <span class="font-medium">{{ $posts->total() }}</span>
+                    results
+                </div>
                 <div class="flex items-center">
                     <span class="text-gray-600 mr-2">Sort by:</span>
-                    <select class="border rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Newest First</option>
-                        <option>Oldest First</option>
-                        <option>Most Popular</option>
-                        <option>Most Comments</option>
-                    </select>
+                    <form method="GET" action="{{ route('home.categories') }}">
+                        <select name="sort" onchange="this.form.submit()" 
+                            class="border rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Newest First</option>
+                            <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                            <option value="popular" {{ $sort == 'popular' ? 'selected' : '' }}>Most Popular</option>
+                        </select>
+                    </form>
                 </div>
+
             </div>
 
             <!-- Article List -->
             <div class="space-y-6">
                 <!-- Article 1 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
+                
+                @foreach ($posts as $post)
+                    <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
+                    
+                    @if (isset($post->image))
+                    <img src="{{ asset('storage/' . $post->image) }}"
+                         alt="{{ $post->title }}"
+                         class="md:w-1/3 h-48 md:h-auto object-cover">
+                    @else
                     <img src="https://placehold.co/480x200/png" 
                          alt="Web Development" 
                          class="md:w-1/3 h-48 md:h-auto object-cover">
+                    @endif
+
                     <div class="p-6 md:w-2/3">
                         <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">Web Development</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">{{ $post->category->title ?? 'N/A' }}</span>
                             <span class="mx-2">•</span>
-                            <span>May 15, 2023</span>
+                            <span>{{ $post->created_at }}</span>
                             <span class="mx-2">•</span>
-                            <span>5 min read</span>
+                            
                         </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">The Future of Web Development in 2023</h3>
-                        <p class="text-gray-600 mb-4">Explore the latest trends and technologies shaping the future of web development this year.</p>
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">{{ $post->title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ $post->content }}</p>
                         <div class="flex justify-between items-center">
                             <div class="flex space-x-2">
                                 <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#trends</span>
@@ -105,159 +129,16 @@
                         </div>
                     </div>
                 </article>
+                @endforeach
 
                 <!-- Article 2 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
-                    <img src="https://placehold.co/480x200/png" 
-                         alt="React 18" 
-                         class="md:w-1/3 h-48 md:h-auto object-cover">
-                    <div class="p-6 md:w-2/3">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">React</span>
-                            <span class="mx-2">•</span>
-                            <span>July 5, 2023</span>
-                            <span class="mx-2">•</span>
-                            <span>7 min read</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">React 18: What's New and Improved</h3>
-                        <p class="text-gray-600 mb-4">Discover the exciting new features and improvements in React 18 and how they can benefit your projects.</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#react</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#frontend</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-medium hover:text-blue-800 transition">Read More</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Article 3 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
-                    <img src="https://placehold.co/480x200/png" 
-                         alt="TypeScript" 
-                         class="md:w-1/3 h-48 md:h-auto object-cover">
-                    <div class="p-6 md:w-2/3">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">TypeScript</span>
-                            <span class="mx-2">•</span>
-                            <span>June 22, 2023</span>
-                            <span class="mx-2">•</span>
-                            <span>6 min read</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">TypeScript 5.0: Advanced Features Explained</h3>
-                        <p class="text-gray-600 mb-4">Learn how to leverage the powerful new features in TypeScript 5.0 to write more robust and maintainable code.</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#typescript</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#javascript</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-medium hover:text-blue-800 transition">Read More</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Article 4 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
-                    <img src="https://placehold.co/480x200/png" 
-                         alt="Web Performance" 
-                         class="md:w-1/3 h-48 md:h-auto object-cover">
-                    <div class="p-6 md:w-2/3">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">Performance</span>
-                            <span class="mx-2">•</span>
-                            <span>June 18, 2023</span>
-                            <span class="mx-2">•</span>
-                            <span>9 min read</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Optimizing Web Performance in 2023</h3>
-                        <p class="text-gray-600 mb-4">Comprehensive guide to modern web performance optimization techniques that every developer should know.</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#performance</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#webdev</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-medium hover:text-blue-800 transition">Read More</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Article 5 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
-                    <img src="https://placehold.co/480x200/png" 
-                         alt="CSS" 
-                         class="md:w-1/3 h-48 md:h-auto object-cover">
-                    <div class="p-6 md:w-2/3">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">CSS</span>
-                            <span class="mx-2">•</span>
-                            <span>June 10, 2023</span>
-                            <span class="mx-2">•</span>
-                            <span>4 min read</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Modern CSS Techniques You Should Know</h3>
-                        <p class="text-gray-600 mb-4">Explore the latest CSS features and techniques that can help you build better interfaces with less code.</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#css</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#frontend</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-medium hover:text-blue-800 transition">Read More</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Article 6 -->
-                <article class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
-                    <img src="https://placehold.co/480x200/png" 
-                         alt="Web Components" 
-                         class="md:w-1/3 h-48 md:h-auto object-cover">
-                    <div class="p-6 md:w-2/3">
-                        <div class="flex items-center text-sm text-gray-500 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs">Web Components</span>
-                            <span class="mx-2">•</span>
-                            <span>May 28, 2023</span>
-                            <span class="mx-2">•</span>
-                            <span>8 min read</span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Web Components: The Future of UI Development?</h3>
-                        <p class="text-gray-600 mb-4">Are Web Components finally ready for prime time? We examine their current state and future potential.</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex space-x-2">
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#webcomponents</span>
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs">#html</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-medium hover:text-blue-800 transition">Read More</a>
-                        </div>
-                    </div>
-                </article>
+               
             </div>
 
             <!-- Pagination -->
-            <div class="mt-8 flex justify-center">
-                <nav class="flex items-center space-x-1">
-                    <a href="#" class="p-2 rounded-md border border-gray-200 bg-white text-gray-500 hover:bg-gray-100 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </a>
-                    
-                    <a href="#" class="px-3.5 py-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors duration-200">1</a>
-                    
-                    <a href="#" aria-current="page" class="px-3.5 py-2 rounded-md border border-blue-500 bg-blue-50 text-sm font-medium text-blue-600 transition-colors duration-200">2</a>
-                    
-                    <a href="#" class="px-3.5 py-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors duration-200">3</a>
-                    
-                    <span class="px-3.5 py-2 rounded-md border border-transparent text-sm font-medium text-gray-500">...</span>
-                    
-                    <a href="#" class="px-3.5 py-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors duration-200">8</a>
-                    
-                    <a href="#" class="p-2 rounded-md border border-gray-200 bg-white text-gray-500 hover:bg-gray-100 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </nav>
-            </div>
+          <x-pagination :datas="$posts" />
+
+
         </main>
         
         <!-- Sidebar -->
